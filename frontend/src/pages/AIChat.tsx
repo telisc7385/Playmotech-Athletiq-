@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import api from "../api/client";
 import Layout from "../components/Layout";
 import { getToken } from "../api/client";
+import Markdown from "../components/Markdown";
 
 interface Message {
   id: string;
@@ -135,7 +136,7 @@ const AIChat: React.FC = () => {
         </span>
       );
     }
-    return <p className="text-sm text-gray-800 whitespace-pre-wrap">{answer}</p>;
+    return <Markdown text={answer} />;
   };
 
   return (
@@ -188,11 +189,12 @@ const AIChat: React.FC = () => {
                       <div className="bg-gradient-to-br from-ghost-50 to-blue-50/80 p-3.5 rounded-2xl rounded-tl-sm max-w-[80%] shadow-sm">
                         <p className="text-[11px] text-ghost-500 mb-1 font-semibold tracking-wider uppercase">Coach</p>
                         {renderCoachAnswer(msg.answer)}
-                        {msg.drillSuggestion && (
-                          <p className="text-sm text-green-700 mt-2 font-medium flex items-center gap-1.5 pt-2 border-t border-ghost-200/50">
-                            <span>🏏</span> Drill: {msg.drillSuggestion}
-                          </p>
-                        )}
+{msg.drillSuggestion && (
+  <div className="mt-2 pt-2 border-t border-ghost-200/50">
+    <p className="text-sm text-green-700 font-medium mb-1">🏏 Drill</p>
+    <Markdown text={msg.drillSuggestion} />
+  </div>
+)}
                       </div>
                     </div>
                   </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../api/client";
 import Layout from "../components/Layout";
+import Markdown from "../components/Markdown";
 
 interface ChatMessage {
   id: string;
@@ -201,12 +202,13 @@ const SessionDetails: React.FC = () => {
                       </div>
                       <div className="bg-ghost-50 p-3 rounded-2xl rounded-tl-sm">
                         <p className="text-xs text-ghost-500 mb-1 font-medium">Coach</p>
-                        <p className="text-sm text-gray-800">{msg.answer}</p>
-                        {msg.drillSuggestion && (
-                          <p className="text-sm text-green-700 mt-2 font-medium flex items-center gap-1">
-                            <span>🏏</span> Drill: {msg.drillSuggestion}
-                          </p>
-                        )}
+                      <Markdown text={msg.answer} />
+                      {msg.drillSuggestion && (
+                        <div className="mt-2 pt-2 border-t border-ghost-200/50">
+                          <p className="text-sm text-green-700 font-medium mb-1">🏏 Drill</p>
+                          <Markdown text={msg.drillSuggestion} />
+                        </div>
+                      )}
                       </div>
                     </div>
                   ))}

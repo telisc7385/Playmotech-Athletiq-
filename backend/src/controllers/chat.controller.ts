@@ -11,7 +11,7 @@ export const sendMessage = async (req: Request, res: Response) => {
 
   const sessionId = req.params.sessionId as string;
 
-  const { stream, save } = await chatService.sendMessageStream(
+  const { stream, save, drillSuggestion } = await chatService.sendMessageStream(
     sessionId,
     req.user!.userId,
     question
@@ -28,7 +28,9 @@ export const sendMessage = async (req: Request, res: Response) => {
     }
 
     const saved = await save();
-    res.write(`data: ${JSON.stringify({ done: true, message: saved })}\n\n`);
+    res.write(
+      `data: ${JSON.stringify({ done: true, message: saved, drillSuggestion })}\n\n`
+    );
   } catch (error: any) {
     res.write(
       `data: ${JSON.stringify({ error: error.message || "Stream failed" })}\n\n`

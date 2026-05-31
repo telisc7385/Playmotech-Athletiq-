@@ -40,25 +40,30 @@ export const sendMessageStream = async (
     question,
   });
 
-  let fullAnswer = "";
+  let rawBuffer = "";
+
+  for await (const chunk of chatWithContextStream(prompt)) {
+    rawBuffer += chunk;
+  }
+
+  const parsed = parseChatResponse(rawBuffer);
+  const words = parsed.answer.split(/(\s+)/);
 
   const stream = (async function* () {
-    for await (const chunk of chatWithContextStream(prompt)) {
-      fullAnswer += chunk;
-      yield chunk;
+    for (const word of words) {
+      yield word;
     }
   })();
 
   const save = async () => {
-    const response = parseChatResponse(fullAnswer);
     return chatRepo.createMessage({
       sessionId,
       userId,
       question,
-      answer: response.answer,
-      drillSuggestion: response.drillSuggestion,
+      answer: parsed.answer,
+      drillSuggestion: parsed.drillSuggestion,
     });
   };
 
-  return { stream, save };
+  return { stream, save, drillSuggestion: parsed.drillSuggestion };
 };
