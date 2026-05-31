@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   LineChart,
   Line,
@@ -39,84 +40,92 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  const trendColor =
-    stats?.trend === "up"
-      ? "text-green-600"
-      : stats?.trend === "down"
-        ? "text-red-600"
-        : "text-gray-600";
+  const trendConfig = {
+    up: { color: "text-green-600", bg: "bg-green-50", border: "border-green-200", label: "Improving", icon: "↑" },
+    down: { color: "text-red-600", bg: "bg-red-50", border: "border-red-200", label: "Declining", icon: "↓" },
+    stable: { color: "text-gray-600", bg: "bg-gray-50", border: "border-gray-200", label: "Stable", icon: "→" },
+  }[stats?.trend || "stable"];
 
-  const trendIcon =
-    stats?.trend === "up" ? "↑" : stats?.trend === "down" ? "↓" : "→";
+  const statsCards = [
+    { label: "Total Sessions", value: stats?.totalSessions ?? 0, icon: "📋", color: "from-ghost-400 to-ghost-600" },
+    { label: "Average Score", value: `${stats?.averageScore ?? 0}/10`, icon: "⭐", color: "from-amber-400 to-orange-500" },
+    { label: "Trend", value: trendConfig.label, icon: trendConfig.icon, color: stats?.trend === "up" ? "from-green-400 to-emerald-500" : stats?.trend === "down" ? "from-red-400 to-rose-500" : "from-gray-400 to-gray-500" },
+  ];
 
   return (
     <Layout>
       <div className="space-y-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-          <p className="text-gray-500">Your coaching progress at a glance</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="page-title">Dashboard</h1>
+            <p className="page-subtitle">Your coaching progress at a glance</p>
+          </div>
+          <Link
+            to="/upload"
+            className="btn-primary hidden sm:inline-flex items-center gap-2"
+          >
+            <span>+</span> New Session
+          </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl shadow-sm p-6 border">
-            <p className="text-sm text-gray-500 font-medium">Total Sessions</p>
-            <p className="text-3xl font-bold text-gray-800 mt-2">
-              {stats?.totalSessions}
-            </p>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm p-6 border">
-            <p className="text-sm text-gray-500 font-medium">Average Score</p>
-            <p className="text-3xl font-bold text-gray-800 mt-2">
-              {stats?.averageScore}/10
-            </p>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm p-6 border">
-            <p className="text-sm text-gray-500 font-medium">Trend</p>
-            <p className={`text-3xl font-bold mt-2 ${trendColor}`}>
-              {trendIcon}{" "}
-              {stats?.trend === "up"
-                ? "Improving"
-                : stats?.trend === "down"
-                  ? "Declining"
-                  : "Stable"}
-            </p>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          {statsCards.map((card) => (
+            <div key={card.label} className="card p-6">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-gray-500">{card.label}</span>
+                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center text-white text-lg`}>
+                  {card.icon}
+                </div>
+              </div>
+              <p className="text-2xl font-bold text-gray-900">
+                {card.value}
+              </p>
+            </div>
+          ))}
         </div>
 
-        {stats && stats.scores.length > 0 && (
-          <div className="bg-white rounded-xl shadow-sm p-6 border">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-              Score History
-            </h2>
-            <ResponsiveContainer width="100%" height={300}>
+        {stats && stats.scores.length > 0 ? (
+          <div className="card p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Score History</h2>
+                <p className="text-sm text-gray-500">Your performance over time</p>
+              </div>
+              <span className="badge-blue">{stats.scores.length} sessions</span>
+            </div>
+            <ResponsiveContainer width="100%" height={320}>
               <LineChart data={stats.scores}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis domain={[0, 10]} />
-                <Tooltip />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#9ca3af" />
+                <YAxis domain={[0, 10]} tick={{ fontSize: 12 }} stroke="#9ca3af" />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: "12px",
+                    border: "1px solid #e5e7eb",
+                    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+                  }}
+                />
                 <Line
                   type="monotone"
                   dataKey="score"
                   stroke="#4c6ef5"
-                  strokeWidth={2}
-                  dot={{ fill: "#4c6ef5" }}
+                  strokeWidth={2.5}
+                  dot={{ fill: "#4c6ef5", strokeWidth: 2, stroke: "#fff", r: 5 }}
+                  activeDot={{ r: 7, fill: "#4c6ef5" }}
                 />
               </LineChart>
             </ResponsiveContainer>
           </div>
-        )}
-
-        {(!stats || stats.scores.length === 0) && (
-          <div className="bg-white rounded-xl shadow-sm p-12 border text-center">
-            <p className="text-gray-500 text-lg">
-              No sessions yet.{" "}
-              <a href="/upload" className="text-ghost-600 hover:underline font-medium">
-                Upload your first photo
-              </a>{" "}
-              to get started.
+        ) : (
+          <div className="card p-16 text-center">
+            <div className="text-5xl mb-4">🏏</div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No sessions yet</h3>
+            <p className="text-gray-500 mb-6">
+              Upload your first photo to get AI-powered coaching feedback.
             </p>
+            <Link to="/upload" className="btn-primary inline-flex">
+              Upload Your First Photo
+            </Link>
           </div>
         )}
       </div>
