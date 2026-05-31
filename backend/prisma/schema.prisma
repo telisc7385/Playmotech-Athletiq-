@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ExperienceLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+model User {
+  id              String   @id @default(uuid())
+  fullName        String
+  email           String   @unique
+  password        String
+  sport           String
+  role            String
+  experienceLevel ExperienceLevel
+  createdAt       DateTime @default(now())
+
+  sessions ChatMessage[]
+}
+
+model Session {
+  id            String   @id @default(uuid())
+  userId        String
+  imagePath     String
+  overallScore  Int      @default(0)
+  strengths     Json
+  areasToImprove Json
+  priorityFix   String   @default("")
+  drillSuggestion String @default("")
+  confidenceLevel String @default("")
+  rawResponse   Json?
+  createdAt     DateTime @default(now())
+
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chatMessages ChatMessage[]
+
+  @@index([userId, createdAt])
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  sessionId String
+  userId    String
+  question  String
+  answer    String
+  drillSuggestion String @default("")
+  createdAt DateTime @default(now())
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+}
