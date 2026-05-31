@@ -1,12 +1,12 @@
 import { AppError } from "../core/appError";
-import { chatWithContext } from "../utils/gemini";
+import { chatWithContextStream } from "../utils/gemini";
 import { parseChatResponse } from "../utils/jsonValidator";
 import { buildChatPrompt } from "../prompts/chat.prompt";
 import * as chatRepo from "../repositories/chat.repository";
 import * as sessionRepo from "../repositories/session.repository";
 import * as authRepo from "../repositories/auth.repository";
 
-export const sendMessage = async (
+export const sendMessageStream = async (
   sessionId: string,
   userId: string,
   question: string
@@ -40,16 +40,25 @@ export const sendMessage = async (
     question,
   });
 
-  const rawText = await chatWithContext(prompt);
-  const response = parseChatResponse(rawText);
+  let fullAnswer = "";
 
-  const message = await chatRepo.createMessage({
-    sessionId,
-    userId,
-    question,
-    answer: response.answer,
-    drillSuggestion: response.drillSuggestion,
-  });
+  const stream = (async function* () {
+    for await (const chunk of chatWithContextStream(prompt)) {
+      fullAnswer += chunk;
+      yield chunk;
+    }
+  })();
 
-  return message;
+  const save = async () => {
+    const response = parseChatResponse(fullAnswer);
+    return chatRepo.createMessage({
+      sessionId,
+      userId,
+      question,
+      answer: response.answer,
+      drillSuggestion: response.drillSuggestion,
+    });
+  };
+
+  return { stream, save };
 };

@@ -24,6 +24,8 @@ api.interceptors.response.use(
   }
 );
 
+export const getToken = (): string | null => localStorage.getItem("token");
+
 export default api;
 
 export interface ApiResponse<T = any> {

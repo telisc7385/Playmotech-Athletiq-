@@ -40,19 +40,21 @@ export const analyzeImageWithPrompt = async (
   }
 };
 
-export const chatWithContext = async (
+export async function* chatWithContextStream(
   prompt: string
-): Promise<string> => {
+): AsyncGenerator<string> {
   try {
     const model = genAI.getGenerativeModel({ model: envConfig.geminiModel });
+    const result = await model.generateContentStream(prompt);
 
-    const result = await model.generateContent(prompt);
-    const response = result.response;
-    return response.text();
+    for await (const chunk of result.stream) {
+      const text = chunk.text();
+      if (text) yield text;
+    }
   } catch (error: any) {
     throw new AppError(
-      `Gemini API error: ${error.message || "Failed to get response"}`,
+      `Gemini API error: ${error.message || "Failed to stream response"}`,
       502
     );
   }
-};
+}
