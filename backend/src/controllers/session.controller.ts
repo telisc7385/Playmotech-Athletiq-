@@ -8,9 +8,11 @@ export const analyze = async (req: Request, res: Response) => {
     throw new AppError("Image file is required", 400);
   }
 
+  const imagePath = `/uploads/${req.file.filename}`;
+
   const session = await sessionService.analyzeSession(
     req.user!.userId,
-    req.file.path
+    imagePath
   );
   createdResponse(res, session, "Analysis complete");
 };
@@ -22,7 +24,7 @@ export const getAll = async (req: Request, res: Response) => {
 
 export const getById = async (req: Request, res: Response) => {
   const session = await sessionService.getSessionDetail(
-    req.params.id,
+    req.params.id as string,
     req.user!.userId
   );
   successResponse(res, session, "Session details fetched");

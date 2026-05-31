@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum ExperienceLevel {
@@ -22,7 +23,8 @@ model User {
   experienceLevel ExperienceLevel
   createdAt       DateTime @default(now())
 
-  sessions ChatMessage[]
+  sessions     Session[]
+  chatMessages ChatMessage[]
 }
 
 model Session {

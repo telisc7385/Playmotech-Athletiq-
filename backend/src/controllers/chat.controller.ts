@@ -10,8 +10,10 @@ export const sendMessage = async (req: Request, res: Response) => {
     throw new AppError("Question is required", 400);
   }
 
+  const sessionId = req.params.sessionId as string;
+
   const message = await chatService.sendMessage(
-    req.params.sessionId,
+    sessionId,
     req.user!.userId,
     question
   );

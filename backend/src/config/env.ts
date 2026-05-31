@@ -7,6 +7,7 @@ interface EnvConfigPayload {
   dbUrl: string;
   jwtSecret: string;
   geminiKey: string;
+  geminiModel: string;
 }
 
 export const envConfig: EnvConfigPayload = {
@@ -14,4 +15,5 @@ export const envConfig: EnvConfigPayload = {
   dbUrl: process.env.DATABASE_URL || "",
   jwtSecret: process.env.JWT_SECRET || "",
   geminiKey: process.env.GEMINI_API_KEY || "",
+  geminiModel: process.env.GEMINI_MODEL || "gemini-2.5-flash",
 };

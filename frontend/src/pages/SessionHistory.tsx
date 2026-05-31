@@ -73,7 +73,7 @@ const SessionHistory: React.FC = () => {
                 className="bg-white rounded-xl shadow-sm border p-4 flex items-center gap-4 hover:shadow-md transition"
               >
                 <img
-                  src={`http://localhost:5000/${session.imagePath}`}
+                  src={`http://localhost:5000${session.imagePath}`}
                   alt="Session"
                   className="w-20 h-20 object-cover rounded-lg"
                 />

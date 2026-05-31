@@ -2,17 +2,26 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { envConfig } from "../config/env";
 import { AppError } from "../core/appError";
 import fs from "fs";
+import path from "path";
 
 const genAI = new GoogleGenerativeAI(envConfig.geminiKey);
+
+const resolvePath = (filePath: string): string => {
+  if (filePath.startsWith("/uploads/")) {
+    return path.join(process.cwd(), filePath);
+  }
+  return filePath;
+};
 
 export const analyzeImageWithPrompt = async (
   imagePath: string,
   prompt: string
 ): Promise<string> => {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: envConfig.geminiModel });
 
-    const imageData = fs.readFileSync(imagePath);
+    const fullPath = resolvePath(imagePath);
+    const imageData = fs.readFileSync(fullPath);
     const base64Image = imageData.toString("base64");
     const mimeType = imagePath.endsWith(".png") ? "image/png" : "image/jpeg";
 
@@ -35,7 +44,7 @@ export const chatWithContext = async (
   prompt: string
 ): Promise<string> => {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: envConfig.geminiModel });
 
     const result = await model.generateContent(prompt);
     const response = result.response;
